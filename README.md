@@ -7,10 +7,10 @@
 ---
 
 ## ✨ Features
-- **Multi‑agent backend**: `SecurityAnalysisAgent`, `PerformanceMonitoringAgent`, `ReportingAgent`, `ParameterTuningAgent`, `ChatAgent`
+- **Multi-agent backend**: `SecurityAnalysisAgent`, `PerformanceMonitoringAgent`, `ReportingAgent`, `ParameterTuningAgent`, `ChatAgent`
 - **Traffic analytics utilities**: PCAP parsing and attack detection (`backend/tools/*`)
-- **Real‑time UI**: React dashboards (`GlobalControllerDashboard`, `LocalControllerDashboard`) and a `NetworkVisualizer`
-- **Demo datasets**: `nodes_data.json` + `packets_data.json` (8‑node and 20‑node scenarios)
+- **Real-time UI**: React dashboards (`GlobalControllerDashboard`, `LocalControllerDashboard`) and a `NetworkVisualizer`
+- **Demo datasets**: `nodes_data.json` + `packets_data.json` (8-node and 20-node scenarios)
 - **Simulation XMLs**: example DoS/SYN flood scenarios to drive animations
 
 ---
@@ -176,7 +176,7 @@ Simulation/animation XMLs (e.g., `syn-flood-animation.xml`, `dos-simulation-anim
 - **PerformanceMonitoringAgent** — tracks throughput, latency, drops; pushes alerts
 - **ReportingAgent** — summarizes results and generates reports
 - **ParameterTuningAgent** — adjusts thresholds or model parameters over time
-- **ChatAgent** — natural‑language interface to metrics/history
+- **ChatAgent** — natural-language interface to metrics/history
 
 Agent code is under `backend/nw_agents/`.
 
@@ -221,17 +221,18 @@ PRs and issues are welcome. Please:
 
 ---
 
-## 📄 License
+## 📄 License (MIT OR Apache‑2.0)
 
-Add your license of choice (e.g., MIT/Apache‑2.0) at the repo root as `LICENSE`.
+This project is dual‑licensed under either:
+
+- **Apache License, Version 2.0** — see `LICENSE-APACHE`
+- **MIT License** — see `LICENSE-MIT`
+
+At your option, you may use either license. For convenience, the SPDX identifier is:
+
+```
+SPDX-License-Identifier: MIT OR Apache-2.0
+```
 
 ---
-
-## 📝 Git Tips
-
-If your local branch shows a missing upstream:
-```bash
-git branch --unset-upstream                 # remove broken link
-git remote add origin https://github.com/<USER>/<REPO>.git
-git push -u origin main
-```
+ 
