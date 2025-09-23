@@ -5,7 +5,7 @@ This README summarizes two ns-3 scenarios that are present.
 ---
 
 ## 1) DoS (UDP Flood) — 8 Nodes
-x,,
+
 ### Network
 - **Nodes:** 8 (IDs 0–7)
 - **PHY/MAC:** 802.11g, AdhocWifiMac over YansWifiChannel
