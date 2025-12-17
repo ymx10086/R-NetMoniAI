@@ -9,18 +9,42 @@
 📄 **Paper**: [NetMoniAI: An Agentic AI Framework for Network Security & Monitoring](https://arxiv.org/abs/2508.10052)  
 🔗 **GitHub**: https://github.com/pzambare3/NetMoniAI
 
-![NetMoniAI Architecture](Architecture.jpeg)
-
 ---
 
 ## ✨ Features
-- **Multi-agent backend**: `SecurityAnalysisAgent`, `PerformanceMonitoringAgent`, `ReportingAgent`, `ParameterTuningAgent`, `ChatAgent`
-- **Traffic analytics utilities**: PCAP parsing and attack detection (`backend/tools/*`)
-- **Real-time UI**: React dashboards (`GlobalControllerDashboard`, `LocalControllerDashboard`) and a `NetworkVisualizer`
-- **Demo datasets**: `nodes_data.json` + `packets_data.json` (8-node and 20-node scenarios)
-- **Simulation XMLs**: example DoS/SYN flood scenarios to drive animations
+
+- **Hybrid Monitoring**: Combines packet-level and flow-level analysis for scalable threat detection
+- **Autonomous Node Agents**: Each node runs integrated agent pipeline with LLM-powered semantic analysis
+- **Two-Tier Architecture**: Decentralized node intelligence + centralized threat correlation
+- **LLM Integration**: Supports GPT-O3, Gemini Pro, and local BERT for adaptive threat detection
+- **Real-Time Dashboard**: WebSocket-based visualization with attacker/victim role identification
+- **Validated Performance**: Tested on local testbed and NS-3 simulations (up to 50 nodes)
 
 ---
+
+## 🏗️ Architecture
+
+### Node-Level Agents
+
+![Node Agent Architecture](paper/figures/Figure.1 Node-Level agent architecture.png)
+
+Each node runs an integrated agent pipeline with specialized modules:
+- **PerformanceMonitoringAgent** - Metrics collection and threshold monitoring
+- **SecurityAnalysisAgent** - LLM-based threat detection
+- **ReportingAgent** - Structured report generation
+- **ParameterTuningAgent** - Adaptive threshold adjustment
+- **ChatAgent** - Natural language interface
+
+### Central Controller (Global Controller)
+
+![Central Controller Architecture](paper/figures/Figure.2 Central controller architecture.png)
+
+Aggregates node reports to detect coordinated attacks:
+- Correlates events across nodes via short-term memory
+- Classifies nodes as attackers, victims, or benign
+- Maintains system-wide situational awareness
+
+> **Note**: Code uses "Global Controller" (gc prefix) which refers to the Central Controller in the paper.
 
 ## 📁 Repository Structure (high level)
 
