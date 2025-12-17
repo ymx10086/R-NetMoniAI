@@ -13,10 +13,6 @@
 
 ---
 
-![Architecture](Architecture.jpeg)
-
----
-
 ## ✨ Features
 - **Multi-agent backend**: `SecurityAnalysisAgent`, `PerformanceMonitoringAgent`, `ReportingAgent`, `ParameterTuningAgent`, `ChatAgent`
 - **Traffic analytics utilities**: PCAP parsing and attack detection (`backend/tools/*`)
