@@ -1,6 +1,17 @@
-# NetMoniAI
+# NetMoniAI: An Agentic AI Framework for Network Security & Monitoring
 
-**NetMoniAI** is a network‑monitoring AI system with a FastAPI backend (REST + optional WebSocket) and a React frontend for real‑time visualization. It includes agent modules for security analysis, performance monitoring, reporting, and parameter tuning, plus demo JSONs to preview the UI.
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![arXiv](https://img.shields.io/badge/arXiv-2508.10052-b31b1b.svg)](https://arxiv.org/abs/2508.10052)
+
+**NetMoniAI** is an agentic AI framework for automatic network monitoring and security that integrates decentralized analysis with lightweight centralized coordination. The framework consists of autonomous micro-agents at each node for local traffic analysis, and a central controller that aggregates insights to detect coordinated attacks.
+
+📄 **Paper**: [NetMoniAI: An Agentic AI Framework for Network Security & Monitoring](https://arxiv.org/abs/2508.10052)  
+🔗 **GitHub**: https://github.com/pzambare3/NetMoniAI
+
+![NetMoniAI Architecture](Architecture.jpeg)
+
+---
 
 ![Architecture](Architecture.jpeg)
 
