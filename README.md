@@ -26,7 +26,7 @@
 
 ### Node-Level Agents
 
-![Node Agent Architecture](paper/figures/Figure.1 Node-Level agent architecture.png)
+![Node Agent Architecture](paper/node_agent_architecture.png)
 
 Each node runs an integrated agent pipeline with specialized modules:
 - **PerformanceMonitoringAgent** - Metrics collection and threshold monitoring
@@ -37,7 +37,7 @@ Each node runs an integrated agent pipeline with specialized modules:
 
 ### Central Controller (Global Controller)
 
-![Central Controller Architecture](paper/figures/paper/central_controller_architecture.png)
+![Central Controller Architecture](paper/central_controller_architecture.png)
 
 Aggregates node reports to detect coordinated attacks:
 - Correlates events across nodes via short-term memory
