@@ -266,7 +266,6 @@ python backend/tools/pcap_analyzer.py path/to/capture.pcap
 NS-3 scenario XMLs are included in `backend/`:
 - `dos-simulation-animation.xml` - DoS attack scenario
 - `syn-flood-animation.xml` - SYN flood scenario
-- `simulation3.xml` - Multi-attack scenario
 
 ---
 
