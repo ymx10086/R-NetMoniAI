@@ -49,26 +49,38 @@ Aggregates node reports to detect coordinated attacks:
 ## 📁 Repository Structure (high level)
 
 ```
-backend/
-  app.py                 # FastAPI app (REST)
-  appWebsocket.py        # WebSocket server (if run separately)
-  config.py              # Backend config (envs, ports, etc.)
-  utils.py, common_classes.py
-  nw_agents/             # Agent implementations
-  tools/                 # PCAP + attack detection utilities
-  *.xml                  # Simulation/animation scenarios
-  *.log                  # Logs (runtime & metrics)
-  requirements.txt
-
-frontend/
-  public/                # Static assets + default nodes/packets JSON
-  src/                   # React app (components, API service, styles)
-  package.json
-  README.md              # Frontend-specific notes (if any)
-
-requirements.txt         # (root if used)
-Architecture.jpeg
-.gitignore
+```
+NetMoniAI/
+├── backend/                    # FastAPI backend
+│   ├── app.py                 # Main application (local agent mode)
+│   ├── appWebsocket.py        # WebSocket server
+│   ├── analyze_nodes.py       # Offline PCAP batch analysis
+│   ├── config.py              # Configuration
+│   ├── nw_agents/             # Agent implementations
+│   ├── tools/                 # PCAP analysis utilities
+│   ├── segregated/            # PCAP storage (NS-3 outputs)
+│   ├── requirements.txt       # Python dependencies
+│   └── *.xml                  # NS-3 simulation scenarios
+│
+├── frontend/                   # React application
+│   ├── src/
+│   │   ├── components/        # UI components
+│   │   │   ├── GlobalControllerDashboard.js
+│   │   │   ├── LocalControllerDashboard.js
+│   │   │   └── NetworkVisualizer.js
+│   │   └── services/          # API clients
+│   ├── public/
+│   │   ├── nodes_data.json    # Demo 8-node topology
+│   │   └── packets_data.json  # Demo packet flows
+│   ├── jsons/                 # Additional demo datasets
+│   └── package.json
+│   └── README.md              # Frontend-specific notes (if any)
+│
+├── paper/
+│   └── figures/               # Architecture diagrams from paper
+│
+├── requirements.txt           # (root if used)
+└── .gitignore
 ```
 
 ---
