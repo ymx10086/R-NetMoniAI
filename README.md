@@ -37,7 +37,7 @@ Each node runs an integrated agent pipeline with specialized modules:
 
 ### Central Controller (Global Controller)
 
-![Central Controller Architecture](paper/figures/Figure.2 Central controller architecture.png)
+![Central Controller Architecture](paper/figures/paper/central_controller_architecture.png)
 
 Aggregates node reports to detect coordinated attacks:
 - Correlates events across nodes via short-term memory
