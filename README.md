@@ -155,21 +155,48 @@ npm start
 Open **http://localhost:3000** in your browser.
 
 ---
+## 📖 Usage
 
-## 🧪 Demo Mode (no backend required)
+### Real-Time Monitoring (Local Testbed)
 
-To quickly showcase the UI without running live analysis, the frontend can read bundled JSONs from `frontend/public/`:
+The system automatically monitors network performance. When anomalies are detected (high latency, packet loss), agents:
 
-- `nodes_data.json`
-- `packets_data.json`
+1. Capture network traffic using tshark
+2. Analyze packets with LLM inference
+3. Generate structured reports
+4. Send alerts to the dashboard via WebSocket
 
-There are additional demo files under:
-- `frontend/jsons/nodes-8-nodes-1st/`
-- `frontend/jsons/jsons-20-nodes/`
+### Offline Analysis (NS-3 Simulations)
 
-During development, you can fetch from `/nodes_data.json` and `/packets_data.json` (the public folder) when `REACT_APP_API_URL` is empty or when you add a simple toggle in the code.
+Process PCAP files from NS-3 simulations:
+
+```bash
+cd backend
+python analyze_nodes.py
+```
+
+This script:
+- Reads PCAP files from `segregated/segregated_pcaps*`
+- Analyzes each node's traffic with SecurityAnalysisAgent
+- Posts reports to the central controller (`POST /gcreport`)
+- Updates the dashboard with attacker/victim classifications
+
+The `analyze_nodes.py` script handles:
+- Rate limiting for Gemini API (5 RPM, 25 RPD)
+- Automatic retry with exponential backoff
+- Time-series metrics extraction
+- JSON serialization for the controller
+
+### Demo Mode (No Backend Required)
+
+The frontend can run independently using demo JSON files:
+- `frontend/public/nodes_data.json` - 8-node scenario
+- `frontend/jsons/jsons-20-nodes/` - 20-node scenario
+
+Just start the frontend without the backend to explore the UI.
 
 ---
+
 
 ## 🔌 API & WebSocket (adjust to your code)
 
