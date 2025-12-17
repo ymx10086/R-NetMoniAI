@@ -382,25 +382,42 @@ These files help with debugging and reviewing prior events.
 
 ---
 
-## 📦 Production Build
+## 📦 Deployment (Optional - For Production Use)
 
-### Frontend
+> **Note**: This section is only needed if deploying NetMoniAI to a production server. For local development and research purposes, use the [Quick Start](#-quick-start) guide above.
+
+### Frontend Production Build
 ```bash
 cd frontend
 npm run build
-# Serve with nginx, Apache, or any static server
+
+# The build folder can be served with any static file server:
+# - nginx
+# - Apache
+# - serve (npm package): npx serve -s build
 ```
 
-### Backend
-Run with production ASGI server:
+### Backend Production Server
 ```bash
-gunicorn -w 4 -k uvicorn.workers.UvicornWorker backend.app:app
+# Install gunicorn
+pip install gunicorn
+
+# Run with multiple workers for better performance
+gunicorn -w 4 -k uvicorn.workers.UvicornWorker backend.app:app --bind 0.0.0.0:8000
+
+# Or use uvicorn directly (single worker)
+uvicorn backend.app:app --host 0.0.0.0 --port 8000 --workers 4
 ```
 
-Set proper environment variables and use reverse proxy (nginx) for production.
+### Production Checklist
+- [ ] Set production environment variables (remove debug flags)
+- [ ] Use HTTPS (configure SSL certificates)
+- [ ] Set up reverse proxy (nginx/Apache) for both frontend and backend
+- [ ] Configure firewall rules
+- [ ] Set up logging and monitoring
+- [ ] Use process manager (systemd, supervisor, or PM2)
 
 ---
-
 ## 📚 Citation
 
 If you use NetMoniAI in your research, please cite:
