@@ -201,15 +201,25 @@ Simulation/animation XMLs (e.g., `syn-flood-animation.xml`, `dos-simulation-anim
 
 ---
 
-## 🧠 Agents Overview
+## 🧪 Evaluation Results
 
-- **SecurityAnalysisAgent** — flags anomalies/attacks from flows or summaries
-- **PerformanceMonitoringAgent** — tracks throughput, latency, drops; pushes alerts
-- **ReportingAgent** — summarizes results and generates reports
-- **ParameterTuningAgent** — adjusts thresholds or model parameters over time
-- **ChatAgent** — natural-language interface to metrics/history
+NetMoniAI was evaluated in two environments:
 
-Agent code is under `backend/nw_agents/`.
+### Local Micro-Testbed
+- **Setup**: Ubuntu 22.04 with network degradation (600ms delay, 1Mbps bandwidth)
+- **Result**: Detected anomalies within 5 seconds, with accurate threat classification
+- **Tools**: Linux `tc` utility, macOS Network Link Conditioner
+
+### NS-3 Simulation
+- **Setup**: 8-node virtual network with coordinated TCP flood attack
+- **Result**: Successfully identified attackers (Node 1) and victims (Nodes 4, 6)
+- **Detection**: Real-time correlation across distributed nodes
+
+The system demonstrated:
+- ✅ Low-latency detection (< 5 seconds)
+- ✅ Accurate role classification (attacker/victim/benign)
+- ✅ Scalable distributed architecture
+- ✅ Interpretable LLM-generated reports
 
 ---
 
@@ -243,27 +253,51 @@ Run backend with a production server (e.g., `uvicorn` behind `gunicorn`/`nginx`)
 
 ---
 
+## 📚 Citation
+
+If you use NetMoniAI in your research, please cite:
+
+```bibtex
+@article{zambare2025netmoniai,
+  title={NetMoniAI: An Agentic AI Framework for Network Security \& Monitoring},
+  author={Zambare, Pallavi and Thanikella, Venkata Nikhil and 
+          Kottur, Nikhil Padmanabh and Akula, Sree Akhil and Liu, Ying},
+  journal={arXiv preprint arXiv:2508.10052},
+  year={2025}
+}
+```
+
+---
+
+## 📄 License
+
+This project is dual-licensed under:
+- **MIT License** - see LICENSE-MIT
+- **Apache License 2.0** - see LICENSE-APACHE
+
+**SPDX-License-Identifier**: MIT OR Apache-2.0
+
+---
+
 ## 🤝 Contributing
 
-PRs and issues are welcome. Please:
-1. Open an issue describing the change
-2. Use feature branches
-3. Keep commits scoped and descriptive
+We welcome contributions! Please:
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+For detailed guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md) (if you want this file, let me know!).
 
 ---
 
-## 📄 License (MIT OR Apache‑2.0)
+## 👥 Authors
 
-This project is dual‑licensed under either:
-
-- **Apache License, Version 2.0** — see `LICENSE-APACHE`
-- **MIT License** — see `LICENSE-MIT`
-
-At your option, you may use either license. For convenience, the SPDX identifier is:
-
-```
-SPDX-License-Identifier: MIT OR Apache-2.0
-```
+- **Pallavi Zambare** - Texas Tech University - pzambare@ttu.edu
+- **Venkata Nikhil Thanikella** - nikhilvenkata.t@gmail.com
+- **Nikhil Padmanabh Kottur** - nkotturi@ttu.edu
+- **Sree Akhil Akula** - sreakula@ttu.edu
+- **Ying Liu** - y.liu@ttu.edu (Project Lead)
 
 ---
- 
