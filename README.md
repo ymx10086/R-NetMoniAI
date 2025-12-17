@@ -273,7 +273,30 @@ These help with debugging and reviewing prior events.
 - **Windows PowerShell venv activation**: use `. .venv/Scripts/Activate.ps1`. If blocked, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` (then reopen PowerShell).
 
 ---
+## 🔧 Configuration & Customization
 
+### Changing LLM Models
+
+The framework supports multiple LLM backends, but changing models requires **code modifications**:
+
+**Supported Models**:
+- **Gemini Pro** (Google) - Default in evaluation
+- **GPT-O3** (OpenAI) - Used in paper experiments
+- **Local BERT** (Hugging Face) - For offline/resource-constrained environments
+
+**To switch models**, edit `backend/nw_agents/SecurityAnalysisAgent.py`:
+
+```python
+# Example: Change from Gemini to GPT
+# Locate the model initialization section and update:
+
+# FROM (Gemini):
+import google.generativeai as genai
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+model = genai.GenerativeModel('gemini-pro')
+
+# TO (GPT):
+---
 ## 📦 Production Build
 
 ```bash
