@@ -198,18 +198,44 @@ Just start the frontend without the backend to explore the UI.
 ---
 
 
-## 🔌 API & WebSocket (adjust to your code)
+## 🔌 API Reference
 
-Exact routes depend on your `backend/app.py` and `appWebsocket.py`. Common patterns include:
+### Central Controller Endpoints
 
-- Health: `GET /health`
-- Analyze/ingest: `POST /analyze` (e.g., analyze PCAP/JSON data)
-- WebSocket: `ws://<host>:<port>/ws` (stream metrics/events)
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/gcreport` | POST | Submit node analysis report |
+| `/gcstatuses` | GET | Get all node statuses |
+| `/gccorrelation` | GET | Get attacker/victim correlation |
+| `/gctimeline` | GET | Get recent event timeline |
+| `/ws` | WebSocket | Real-time metrics and alerts |
 
-Check the files to confirm the actual endpoints/paths and update the frontend `apiService.js` accordingly.
+**Example: Submit Report**
+```python
+import requests
+
+report = {
+    "node_ip": "192.168.1.4",
+    "threat_type": "ddos_flood",
+    "severity": "high",
+    "summary": "High-volume TCP traffic detected"
+}
+
+response = requests.post("http://localhost:8000/gcreport", json=report)
+print(response.json())
+# {"message": "Report for 192.168.1.4 received", "role": "victim"}
+```
+
+**Example: Get Correlation**
+```python
+response = requests.get("http://localhost:8000/gccorrelation")
+data = response.json()
+
+print(f"Attackers: {data['attackers']}")
+print(f"Victims: {data['victims']}")
+```
 
 ---
-
 
 ## 🔧 Tools & Utilities
 
@@ -233,22 +259,21 @@ NS-3 scenario XMLs are included in `backend/`:
 
 ---
 
-
 ## 🧪 Evaluation Results
 
 NetMoniAI was evaluated in two environments:
 
 ### Local Micro-Testbed
 - **Setup**: Ubuntu 22.04 with network degradation (600ms delay, 1Mbps bandwidth)
-- **Result**: Detected anomalies within 5 seconds, with accurate threat classification
 - **Tools**: Linux `tc` utility, macOS Network Link Conditioner
+- **Result**: Detected anomalies within 5 seconds with accurate threat classification
 
 ### NS-3 Simulation
 - **Setup**: 8-node virtual network with coordinated TCP flood attack
-- **Result**: Successfully identified attackers (Node 1) and victims (Nodes 4, 6)
-- **Detection**: Real-time correlation across distributed nodes
+- **Attack**: Node 1 targeted Nodes 4 and 6 with TCP SYN flood
+- **Result**: Successfully identified attackers and victims through real-time correlation
 
-The system demonstrated:
+**Key Achievements**:
 - ✅ Low-latency detection (< 5 seconds)
 - ✅ Accurate role classification (attacker/victim/benign)
 - ✅ Scalable distributed architecture
@@ -256,23 +281,6 @@ The system demonstrated:
 
 ---
 
-## 🗂 Logs & History
-
-- `backend/agent_app.log`, `backend/network_metrics.log`, `backend/metrics_metrics.log`
-- History snapshots: `backend/history.json`, `backend/history_backup.json`
-
-These help with debugging and reviewing prior events.
-
----
-
-## 🛠 Troubleshooting
-
-- **CORS errors**: ensure `REACT_APP_API_URL` matches your backend host/port; enable CORS in FastAPI if needed.
-- **WebSocket not connecting**: verify the WS port and path; align `REACT_APP_WS_URL` with `appWebsocket.py` (or the WS route in `app.py`).
-- **Module import issues**: run servers from the **repo root** so `backend/` resolves as a package.
-- **Windows PowerShell venv activation**: use `. .venv/Scripts/Activate.ps1`. If blocked, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` (then reopen PowerShell).
-
----
 ## 🔧 Configuration & Customization
 
 ### Changing LLM Models
@@ -296,16 +304,89 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel('gemini-pro')
 
 # TO (GPT):
----
-## 📦 Production Build
-
-```bash
-# frontend
-npm run build
-# serve the build with your preferred static server or reverse proxy (nginx, etc.)
+from openai import OpenAI
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Update inference calls accordingly
 ```
 
-Run backend with a production server (e.g., `uvicorn` behind `gunicorn`/`nginx`) and set proper environment variables.
+> **Important**: Model selection is hardcoded in agent implementations and not configurable via environment variables.
+
+### Adjusting Detection Thresholds
+
+Modify thresholds in `backend/config.py` or via environment variables:
+
+```python
+# backend/config.py
+LATENCY_THRESHOLD = float(os.getenv("LATENCY_THRESHOLD", 200))  # ms
+PACKET_LOSS_THRESHOLD = float(os.getenv("PACKET_LOSS_THRESHOLD", 5))  # %
+CAPTURE_DURATION = int(os.getenv("CAPTURE_DURATION", 25))  # seconds
+```
+
+### Rate Limiting Configuration
+
+The `analyze_nodes.py` script implements rate limiting for Gemini API:
+
+```python
+REQUESTS_PER_MINUTE = 5
+REQUESTS_PER_DAY = 25
+MAX_RETRIES = 3
+```
+
+---
+
+## 🗂 Logs & History
+
+- `backend/agent_app.log` - Agent activity logs
+- `backend/network_metrics.log` - Performance metrics
+- `backend/metrics_metrics.log` - Metric collection logs
+- `backend/history.json` - Event history snapshots
+- `backend/history_backup.json` - Backup snapshots
+
+These files help with debugging and reviewing prior events.
+
+---
+
+## 🛠 Troubleshooting
+
+**LLM Model Not Working**
+- Ensure correct API key is set in `backend/.env`
+- Verify model configuration in `SecurityAnalysisAgent.py`
+- Check API quota limits (Gemini: 5 RPM, 25 RPD)
+
+**CORS Errors**
+- Ensure `REACT_APP_API_URL` matches backend host/port
+- CORS is already enabled in FastAPI middleware
+
+**WebSocket Not Connecting**
+- Verify `REACT_APP_WS_URL` matches backend WebSocket endpoint
+- Check that WebSocket path is `/ws`
+
+**Module Import Issues**
+- Run servers from **repo root**: `uvicorn backend.app:app`
+- Ensure virtual environment is activated
+
+**Windows PowerShell venv Activation**
+- Use `.\.venv\Scripts\Activate.ps1`
+- If blocked, run: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
+
+---
+
+## 📦 Production Build
+
+### Frontend
+```bash
+cd frontend
+npm run build
+# Serve with nginx, Apache, or any static server
+```
+
+### Backend
+Run with production ASGI server:
+```bash
+gunicorn -w 4 -k uvicorn.workers.UvicornWorker backend.app:app
+```
+
+Set proper environment variables and use reverse proxy (nginx) for production.
 
 ---
 
@@ -344,8 +425,6 @@ We welcome contributions! Please:
 4. Push to the branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
 
-For detailed guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md) (if you want this file, let me know!).
-
 ---
 
 ## 👥 Authors
@@ -354,6 +433,9 @@ For detailed guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md) (if you want thi
 - **Venkata Nikhil Thanikella** - nikhilvenkata.t@gmail.com
 - **Nikhil Padmanabh Kottur** - nkotturi@ttu.edu
 - **Sree Akhil Akula** - sreakula@ttu.edu
-- **Ying Liu** - y.liu@ttu.edu (Project Lead)
+- **Ying Liu** - y.liu@ttu.edu  
 
 ---
+ 
+ 
+ 
