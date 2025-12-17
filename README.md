@@ -49,7 +49,6 @@ Aggregates node reports to detect coordinated attacks:
 ## 📁 Repository Structure (high level)
 
 ```
-```
 NetMoniAI/
 ├── backend/                    # FastAPI backend
 │   ├── app.py                 # Main application (local agent mode)
