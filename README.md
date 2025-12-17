@@ -210,23 +210,29 @@ Check the files to confirm the actual endpoints/paths and update the frontend `a
 
 ---
 
-## 📊 PCAP & Analytics Utilities
 
-Utilities live in `backend/tools/`:
+## 🔧 Tools & Utilities
 
-- `pcap_analyzer.py` — parsing/analyzing PCAPs
-- `attack_detection*.py` — detection heuristics/logic
-- `data_collection.py` — data prep / metrics extraction
+### PCAP Analysis (`backend/tools/`)
 
-Typical script usage (see the file’s `__main__` or comments):
+- `pcap_analyzer.py` - Parse and extract features from PCAP files
+- `attack_detection.py` - Heuristic-based attack detection
+- `data_collection.py` - Metrics aggregation
 
+**Example**:
 ```bash
-python backend/tools/pcap_analyzer.py <path-to-pcap>
+python backend/tools/pcap_analyzer.py path/to/capture.pcap
 ```
 
-Simulation/animation XMLs (e.g., `syn-flood-animation.xml`, `dos-simulation-animation.xml`, `simulation3.xml`) can be used to generate synthetic flows for the UI.
+### Simulation Files
+
+NS-3 scenario XMLs are included in `backend/`:
+- `dos-simulation-animation.xml` - DoS attack scenario
+- `syn-flood-animation.xml` - SYN flood scenario
+- `simulation3.xml` - Multi-attack scenario
 
 ---
+
 
 ## 🧪 Evaluation Results
 
