@@ -460,7 +460,7 @@ We welcome contributions! Please:
 - **Venkata Nikhil Thanikella** - nikhilvenkata.t@gmail.com
 - **Nikhil Padmanabh Kottur** - nkotturi@ttu.edu
 - **Sree Akhil Akula** - sreakula@ttu.edu
-- **Ying Liu** - y.liu@ttu.edu  
+- **Dr.Ying Liu** - y.liu@ttu.edu  
 
 ---
  
