@@ -11,6 +11,7 @@ from appWebsocket import broadcaster, websocket_endpoint
 from config import metrics_queue, attack_queue, reports_queue
 from contextlib import asynccontextmanager
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -86,4 +87,6 @@ async def get_statuses():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    host = os.getenv("APP_HOST", os.getenv("BACKEND_HOST", "0.0.0.0"))
+    port = int(os.getenv("APP_PORT", os.getenv("BACKEND_PORT", "8000")))
+    uvicorn.run(app, host=host, port=port)

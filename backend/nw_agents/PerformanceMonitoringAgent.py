@@ -131,6 +131,8 @@ import asyncio
 from collections import deque
 import subprocess
 from pathlib import Path
+from shutil import which
+import os
 from config import SLIDING_WINDOW_MAXLEN, INTERFACE, DEFAULT_CAPTURE_PATH
 import psutil
 import time
@@ -140,6 +142,22 @@ from common_classes import MyDeps
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def resolve_tshark_binary() -> str | None:
+    """Resolve tshark path across shell/IDE/conda launch contexts."""
+    env_path = os.getenv("TSHARK_PATH", "").strip()
+    candidates = [
+        env_path,
+        which("tshark"),
+        "/opt/homebrew/bin/tshark",
+        "/usr/local/bin/tshark",
+        "/Applications/Wireshark.app/Contents/MacOS/tshark",
+    ]
+    for path in candidates:
+        if path and Path(path).is_file() and os.access(path, os.X_OK):
+            return path
+    return None
 
 class PerformanceMonitoringAgent:
     def __init__(self, metrics_queue: asyncio.Queue, performance_to_tuning_queue: asyncio.Queue,
@@ -257,6 +275,10 @@ class PerformanceMonitoringAgent:
         # Ensure target directory exists even when app is launched from a different cwd.
         self.capture_path.parent.mkdir(parents=True, exist_ok=True)
         self.deps.pathToFile = str(self.capture_path)
+        tshark_bin = resolve_tshark_binary()
+        if not tshark_bin:
+            logger.error("[PERF] tshark binary not found. Install with `brew install wireshark` or set TSHARK_PATH.")
+            return
         logger.info(
             "[PERF] Starting capture: interface=%s duration=%ss output=%s",
             INTERFACE,
@@ -266,7 +288,7 @@ class PerformanceMonitoringAgent:
         try:
             capture_result = await asyncio.to_thread(
                 subprocess.run,
-                ["tshark", "-i", INTERFACE, "-a", f"duration:{self.deps.duration}", "-w", self.deps.pathToFile],
+                [tshark_bin, "-i", INTERFACE, "-a", f"duration:{self.deps.duration}", "-w", self.deps.pathToFile],
                 capture_output=True,
                 text=True
             )
@@ -342,7 +364,8 @@ class PerformanceMonitoringAgent:
                         len(self.history),
                     )
                     
-                    self.sliding_window.clear()
+                    # Keep recent metrics in the sliding window so chat/WS consumers
+                    # can always access the latest sampled data.
             await asyncio.sleep(1)
 
     async def run(self) -> None:

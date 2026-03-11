@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import ApexCharts from "react-apexcharts";
 import "../App.css";
 import Chatbot from "./chatbot";
+import { WS_URL } from "../apiService";
 
 const colors = [
   "#FF5733",
@@ -82,7 +83,7 @@ const Dashboard = () => {
 
   // WebSocket connection function with re-establishment
   const connectWebSocket = () => {
-    const ws = new WebSocket("ws://localhost:8000/ws");
+    const ws = new WebSocket(WS_URL);
     wsRef.current = ws;
 
     ws.onopen = () => {

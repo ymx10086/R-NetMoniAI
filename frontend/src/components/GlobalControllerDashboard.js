@@ -1683,7 +1683,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import ApexCharts from "react-apexcharts";
-import { getNodeStatuses } from "../apiService.js";
+import { getNodeStatuses, WS_URL } from "../apiService.js";
 import "../GlobalControllerDashboard.css";
 import NetworkVisualizer from "./NetworkVisualizer";
 import GlobalChatbot from "./GlobalChatbot";
@@ -1780,7 +1780,7 @@ const GlobalControllerDashboard = () => {
     }
   };
   const connectWebSocket = () => {
-    const ws = new WebSocket("ws://localhost:8000/ws");
+    const ws = new WebSocket(WS_URL);
     wsRef.current = ws;
     ws.onopen = () => { retryCountRef.current = 0; };
     ws.onmessage = (ev) => {

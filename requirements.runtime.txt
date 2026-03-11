@@ -12,3 +12,4 @@ pyshark==0.6
 openai==1.63.2
 httpx==0.28.1
 aiohttp==3.10.10
+websockets==15.0

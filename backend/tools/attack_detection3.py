@@ -14,15 +14,41 @@ def build_client(api_key: str) -> OpenAI:
         raise ValueError("OPENROUTER_API_KEY is not set")
     return OpenAI(api_key=api_key, base_url=OPENROUTER_BASE_URL)
 
+def resolve_tshark_binary() -> str:
+    """Resolve tshark path across shell/IDE/conda launch contexts."""
+    candidates = []
+
+    env_path = os.getenv("TSHARK_PATH", "").strip()
+    if env_path:
+        candidates.append(env_path)
+
+    discovered = which("tshark")
+    if discovered:
+        candidates.append(discovered)
+
+    # Common macOS/Homebrew locations when PATH is minimal in GUI-launched apps.
+    candidates.extend([
+        "/opt/homebrew/bin/tshark",
+        "/usr/local/bin/tshark",
+        "/Applications/Wireshark.app/Contents/MacOS/tshark",
+    ])
+
+    for path in candidates:
+        if path and os.path.isfile(path) and os.access(path, os.X_OK):
+            return path
+
+    raise RuntimeError(
+        "tshark binary not found. Install with `brew install wireshark` or set TSHARK_PATH."
+    )
+
 # Function to convert PCAP to CSV using tshark
 def convert_pcap_to_csv(pcap_path: Union[str, Path]) -> str:
-    if which("tshark") is None:
-        raise RuntimeError("tshark binary not found in PATH")
+    tshark_bin = resolve_tshark_binary()
 
     pcap_path = Path(pcap_path).expanduser().resolve()
 
     tshark_cmd = [
-        "tshark",
+        tshark_bin,
         "-r", str(pcap_path),
         "-T", "fields",
         "-e", "frame.time",
