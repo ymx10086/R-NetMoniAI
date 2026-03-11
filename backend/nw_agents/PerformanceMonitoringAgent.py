@@ -130,7 +130,8 @@
 import asyncio
 from collections import deque
 import subprocess
-from config import SLIDING_WINDOW_MAXLEN, INTERFACE
+from pathlib import Path
+from config import SLIDING_WINDOW_MAXLEN, INTERFACE, DEFAULT_CAPTURE_PATH
 import psutil
 import time
 import json
@@ -150,26 +151,38 @@ class PerformanceMonitoringAgent:
         self.performance_to_security_queue = performance_to_security_queue
         self.security_to_performance_queue = security_to_performance_queue
         self.sliding_window = deque(maxlen=SLIDING_WINDOW_MAXLEN)
-        self.deps = MyDeps(pathToFile="lastCapture/capture.pcap", duration=18, cycle_interval=1)
+        self.capture_path = Path(DEFAULT_CAPTURE_PATH)
+        self.capture_path.parent.mkdir(parents=True, exist_ok=True)
+        self.deps = MyDeps(pathToFile=str(self.capture_path), duration=18, cycle_interval=1)
         self.previous_attack_detected = False
         self.last_check_time = time.time()
         self.history = []
         self.history_file = "history.json"
         self.max_history = 1000
         self.load_history()
+        logger.info(
+            "[PERF] Initialized monitor: interface=%s, pcap=%s, duration=%ss, cycle_interval=%ss",
+            INTERFACE,
+            self.deps.pathToFile,
+            self.deps.duration,
+            self.deps.cycle_interval,
+        )
 
     def load_history(self):
         """Load historical data from JSON file if it exists."""
         try:
             with open(self.history_file, "r") as f:
                 self.history = json.load(f)
+            logger.info("[PERF] Loaded history entries: %d", len(self.history))
         except FileNotFoundError:
             self.history = []
+            logger.info("[PERF] No history file found; starting with empty history")
 
     async def save_history(self):
         """Save the history list to a JSON file, keeping only the last max_history entries."""
         with open(self.history_file, "w") as f:
             json.dump(self.history[-self.max_history:], f)
+        logger.debug("[PERF] History persisted (entries=%d)", len(self.history[-self.max_history:]))
 
     async def collect_metrics(self) -> None:
         """Collect network metrics and update the sliding window."""
@@ -204,7 +217,17 @@ class PerformanceMonitoringAgent:
                 "max_loss": max(losses) if losses else None
             }
             data_point["aggregates"] = aggregates
+            logger.info(
+                "[PERF] Metrics collected: sent=%s recv=%s thr_sent=%.2f thr_recv=%.2f avg_latency=%s avg_loss=%s",
+                bytes_sent,
+                bytes_recv,
+                throughput_sent,
+                throughput_recv,
+                aggregates.get("avg_latency"),
+                aggregates.get("avg_loss"),
+            )
         await self.metrics_queue.put(data_point)
+        logger.debug("[PERF] Metrics queued for broadcaster")
 
     def _should_capture(self) -> bool:
         """Determine if an anomaly requires PCAP capture."""
@@ -218,11 +241,28 @@ class PerformanceMonitoringAgent:
         max_latency = max(latencies)
         avg_loss = sum(losses) / len(losses)
         max_loss = max(losses)
-        return (avg_latency > 75) or (max_latency > 100) or (avg_loss > 5) or (max_loss > 10)
+        should_capture = (avg_latency > 75) or (max_latency > 100) or (avg_loss > 5) or (max_loss > 10)
+        logger.info(
+            "[PERF] Anomaly decision=%s (avg_latency=%.2f, max_latency=%.2f, avg_loss=%.2f, max_loss=%.2f)",
+            should_capture,
+            avg_latency,
+            max_latency,
+            avg_loss,
+            max_loss,
+        )
+        return should_capture
 
     async def capture_pcap(self) -> None:
         """Capture network traffic using tshark."""
-        logger.info(f"Capturing data for {self.deps.duration} seconds...")
+        # Ensure target directory exists even when app is launched from a different cwd.
+        self.capture_path.parent.mkdir(parents=True, exist_ok=True)
+        self.deps.pathToFile = str(self.capture_path)
+        logger.info(
+            "[PERF] Starting capture: interface=%s duration=%ss output=%s",
+            INTERFACE,
+            self.deps.duration,
+            self.deps.pathToFile,
+        )
         try:
             capture_result = await asyncio.to_thread(
                 subprocess.run,
@@ -231,9 +271,11 @@ class PerformanceMonitoringAgent:
                 text=True
             )
             if capture_result.returncode != 0:
-                logger.error(f"Capture failed: {capture_result.stderr}")
+                logger.error("[PERF] Capture failed: %s", capture_result.stderr)
+            else:
+                logger.info("[PERF] Capture completed successfully")
         except Exception as e:
-            logger.error(f"Error during capture: {e}")
+            logger.error("[PERF] Error during capture: %s", e)
 
     async def metric_collection_loop(self) -> None:
         """Periodically collect network metrics."""
@@ -244,6 +286,7 @@ class PerformanceMonitoringAgent:
     async def anomaly_checking_loop(self) -> None:
         """Monitor for anomalies based on cycle interval and update history."""
         while True:
+            logger.debug("Checking for anomalies...")
             current_time = time.time()
             if current_time - self.last_check_time >= self.deps.cycle_interval:
                 self.last_check_time = current_time
@@ -257,21 +300,30 @@ class PerformanceMonitoringAgent:
                     anomaly_detected = self._should_capture()
                     
                     if anomaly_detected:
-                        logger.info("Anomaly detected, coordinating with team.")
+                        logger.warning("[PERF] Anomaly detected, coordinating with tuning/security agents")
                         await self.performance_to_tuning_queue.put({
                             "metrics": latest_metrics,
                             "previous_attack_detected": self.previous_attack_detected,
                             "recent_history": self.history[-10:]
                         })
+                        logger.info("[PERF] Sent context to ParameterTuningAgent")
                         updated_deps = await self.tuning_to_performance_queue.get()
                         self.deps.duration = updated_deps.duration
                         self.deps.cycle_interval = updated_deps.cycle_interval
+                        logger.info(
+                            "[PERF] Tuning update received: duration=%ss cycle_interval=%ss",
+                            self.deps.duration,
+                            self.deps.cycle_interval,
+                        )
                         await self.capture_pcap()
                         await self.performance_to_security_queue.put(self.deps.pathToFile)
+                        logger.info("[PERF] Queued PCAP for security analysis: %s", self.deps.pathToFile)
                         analysis_result = await self.security_to_performance_queue.get()
                         self.previous_attack_detected = analysis_result.attack_detected
                         attack_detected = analysis_result.attack_detected
+                        logger.info("[PERF] Security result received: attack_detected=%s", attack_detected)
                     else:
+                        logger.info("[PERF] No anomaly this cycle; skipping capture and security analysis")
                         attack_detected = None
                     
                     history_entry = {
@@ -283,6 +335,12 @@ class PerformanceMonitoringAgent:
                     }
                     self.history.append(history_entry)
                     await self.save_history()
+                    logger.info(
+                        "[PERF] Cycle summary: anomaly=%s attack=%s history_size=%d",
+                        anomaly_detected,
+                        attack_detected,
+                        len(self.history),
+                    )
                     
                     self.sliding_window.clear()
             await asyncio.sleep(1)

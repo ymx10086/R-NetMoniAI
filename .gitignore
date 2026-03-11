@@ -8,6 +8,14 @@ __pycache__/
 *.pyd
 lastCapture/
 segregated/
+.runtime/
+*.log
+
+# Local runtime/generated state
+backend/lastCapture/
+backend/history.json
+backend/history_backup.json
+history.json
 
 .vscode/
 .idea/

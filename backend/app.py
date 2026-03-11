@@ -39,6 +39,9 @@ async def lifespan(app: FastAPI):
         attack_queue, security_to_report_queue
     )
 
+    # Allow performance agent to push latest metrics into the security/reporting path.
+    performance_agent.security_agent = security_agent
+
     reporting_agent = ReportingAgent(security_to_report_queue, reports_queue)
 
     app.state.performance_agent = performance_agent

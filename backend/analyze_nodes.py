@@ -4,7 +4,6 @@
 # import requests
 # from nw_agents.SecurityAnalysisAgent import SecurityAnalysisAgent
 # from nw_agents.ReportingAgent import ReportingAgent
-# from secretKeys import GEMINI_API_KEYS
 # from decimal import Decimal
 # import time
 # import datetime
@@ -158,7 +157,6 @@
 #     node_ips = [f"{f.split('-')[-1].split('.')[0]}" for f in pcap_files]  # Extract node index (e.g., "0" from "no-of-attackers-1-14-0.pcap")
 #     pcap_paths = [os.path.join(output_dir, f) for f in pcap_files]
     
-#     api_keys = GEMINI_API_KEYS
 #     num_keys = len(api_keys)
     
 #     results = []
@@ -194,10 +192,11 @@ import json
 import os
 import asyncio
 import logging
+from pathlib import Path
 import requests
 from nw_agents.SecurityAnalysisAgent import SecurityAnalysisAgent
 from nw_agents.ReportingAgent import ReportingAgent
-from secretKeys import GEMINI_API_KEYS
+from secretKeys import OPENROUTER_API_KEYS
 from decimal import Decimal
 import time
 import datetime
@@ -206,7 +205,7 @@ from scapy.all import PcapReader
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Rate limit constants for Gemini 2.5 Pro
+# Rate limit constants for OpenRouter provider
 REQUESTS_PER_MINUTE = 5
 REQUESTS_PER_DAY = 25
 DELAY_BETWEEN_REQUESTS = 60 / REQUESTS_PER_MINUTE  # 12 seconds
@@ -225,7 +224,7 @@ def check_daily_quota():
         daily_request_count = 0
         last_request_day = today
     if daily_request_count >= REQUESTS_PER_DAY:
-        logger.error("Daily request limit (25) reached for Gemini 2.5 Pro. Please try again tomorrow.")
+        logger.error("Daily request limit (25) reached for OpenRouter. Please try again tomorrow.")
         return False
     return True
 
@@ -346,14 +345,20 @@ async def main():
         logger.error("No .pcap files found in the directory. Exiting.")
         return
     
-    # Load nodes_data.json to get the correct IP addresses
-    with open("/Users/thanikella_nikhil/Projects-Courses/MS-Project/agents/frontend/public/nodes_data.json", "r") as f:
-        nodes_data = json.load(f)
-    node_ips = [node["id"] for node in nodes_data]  # Use IPs directly from nodes_data.json
+    project_root = Path(__file__).resolve().parent.parent
+    nodes_data_path = project_root / "frontend" / "public" / "nodes_data.json"
+
+    if nodes_data_path.exists():
+        with open(nodes_data_path, "r") as f:
+            nodes_data = json.load(f)
+        node_ips = [node.get("id") for node in nodes_data if node.get("id")]
+    else:
+        logger.warning(f"nodes_data.json not found at {nodes_data_path}. Falling back to index-based IP mapping.")
+        node_ips = [f"192.168.1.{idx + 1}" for idx, _ in enumerate(pcap_files)]
     
     pcap_paths = [os.path.join(output_dir, f) for f in pcap_files]
     
-    api_keys = GEMINI_API_KEYS
+    api_keys = OPENROUTER_API_KEYS
     num_keys = len(api_keys)
     
     results = []

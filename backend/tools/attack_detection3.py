@@ -5,14 +5,14 @@ from shutil import which
 import json
 from typing import Union
 from openai import OpenAI
+from secretKeys import OPENROUTER_BASE_URL, OPENROUTER_MODEL
 
 # print("in attackdetection3.py")
 
-# Set OpenAI API key
-openai_api_key = os.getenv('OPENAI_API_KEY')
-if not openai_api_key:
-    raise ValueError("OPENAI_API_KEY environment variable is not set")
-client = OpenAI(api_key=openai_api_key)
+def build_client(api_key: str) -> OpenAI:
+    if not api_key:
+        raise ValueError("OPENROUTER_API_KEY is not set")
+    return OpenAI(api_key=api_key, base_url=OPENROUTER_BASE_URL)
 
 # Function to convert PCAP to CSV using tshark
 def convert_pcap_to_csv(pcap_path: Union[str, Path]) -> str:
@@ -90,6 +90,12 @@ Your response should contain only the JSON object and no additional text.
 
 # Main function to detect attacks
 def detect_attack_func(path: Union[str, Path], api_key: str) -> str:
+    try:
+        client = build_client(api_key)
+    except Exception as e:
+        print(f"Error initializing OpenRouter client: {e}")
+        return "error"
+
     # Convert PCAP to CSV
     try:
         csv_content = convert_pcap_to_csv(path)
@@ -104,10 +110,7 @@ def detect_attack_func(path: Union[str, Path], api_key: str) -> str:
     # Call OpenAI API
     try:
         response = client.chat.completions.create(
-            # model="gpt-4o-mini-2024-07-18",
-            # model="o4-mini-2025-04-16",
-            model = "o3-2025-04-16",
-            # model="gpt-4o",
+            model=OPENROUTER_MODEL,
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message}
